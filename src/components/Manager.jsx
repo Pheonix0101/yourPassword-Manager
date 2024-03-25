@@ -25,7 +25,7 @@ function Manager() {
   const handleCopytext = (text) => {
     toast("😀 Copy to clipboard!", {
       position: "top-right",
-      autoClose: 5000,
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -46,16 +46,45 @@ function Manager() {
   };
 
   const savePassword = () => {
-    setpassArray([...passArray, { ...form, id: uuidv4() }]);
-    localStorage.setItem(
-      "password",
-      JSON.stringify([...passArray, { ...form, id: uuidv4() }])
-    );
-    setform({ site: "", username: "", password: "" });
-    // console.log([...passArray, form]);
+    if (
+      form.site.length > 3 &&
+      form.username.length > 3 &&
+      form.password.length > 5
+    ) {
+      setpassArray([...passArray, { ...form, id: uuidv4() }]);
+      localStorage.setItem(
+        "password",
+        JSON.stringify([...passArray, { ...form, id: uuidv4() }])
+      );
+      setform({ site: "", username: "", password: "" });
+      toast("😀 Password saved!!!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        // transition: Bounce,
+      });
+    } else {
+      toast("Error: Password not saved!!!");
+    }
   };
 
   const deletePassword = (id) => {
+    toast("😀 Password deleted", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      // transition: Bounce,
+    });
     console.log(" deleting id with password", id);
     let conf = confirm("Are you sure you want to delete");
     if (conf) {
@@ -98,7 +127,7 @@ function Manager() {
       <div className="absolute inset-0 -z-10 h-full w-full bg-green-50 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
         <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-green-400 opacity-20 blur-[100px]"></div>
       </div>
-      <div className=" mycontainer">
+      <div className="p-1 md:p-0 md:mycontainer min-h-[85.08vh]">
         <h1 className="text-2xl font-bold text-center">
           <span className="text-green-500">&lt;</span>
           Pass
@@ -111,17 +140,17 @@ function Manager() {
             type="text"
             name="site"
             placeholder="Enter website URL"
-            id=""
+            id="site"
             value={form.site}
             onChange={handleChange}
           />
-          <div className="flex w-full justify-between gap-10">
+          <div className="flex flex-col md:flex-row w-full justify-between gap-10">
             <input
               className="border border-green-500 focus:border-gray-300  rounded-full w-full text-black p-4 py-1"
               type="text"
               name="username"
               placeholder="Enter Username"
-              id=""
+              id="username"
               value={form.username}
               onChange={handleChange}
             />
@@ -132,7 +161,7 @@ function Manager() {
                 ref={passwordRef}
                 name="password"
                 placeholder="Enter Password"
-                id=""
+                id="password"
                 value={form.password}
                 onChange={handleChange}
               />
@@ -165,7 +194,7 @@ function Manager() {
         <div className="passwords">
           {passArray.length === 0 && <div>No Passwords to show</div>}
           {passArray.length !== 0 && (
-            <table className="table-auto w-full rounded-md overflow-hidden">
+            <table className="table-auto w-full rounded-md overflow-hidden mb-7">
               <thead className="text-white bg-green-800">
                 <tr>
                   <th className="py-1">website URL</th>
