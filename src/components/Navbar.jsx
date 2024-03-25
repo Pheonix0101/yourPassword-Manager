@@ -24,7 +24,7 @@ function Navbar() {
             </a>
           </li>
         </ul> */}
-          <button className="flex gap-1 text-white bg-green-700 my-5 rounded-full p-1 px-2 justify-center items-center cursor-pointer">
+          <button className="flex gap-1 text-white bg-green-700 my-5 rounded-full p-1 px-2 justify-center items-center cursor-pointer ring-white ring-1">
           <span className="font-bold px-1">GitHub</span>
           
           <RxGithubLogo className=" text-3xl "/>

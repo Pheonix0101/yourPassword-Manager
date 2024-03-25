@@ -3,6 +3,7 @@ import { IoEye } from "react-icons/io5";
 import { IoMdEyeOff } from "react-icons/io";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { v4 as uuidv4 } from "uuid";
 
 import "../App.css";
 
@@ -14,33 +15,15 @@ function Manager() {
   const passRef = useRef();
   const passwordRef = useRef();
 
-  const handlePassword = () => {
-    setshowPassword((pass) => !pass);
-    const passwordInput = passwordRef.current;
-    if (passwordInput) {
-      passwordInput.type = showPassword ? "password" : "text";
-    }
-  };
-
-  const savePassword = () => {
-    setpassArray([...passArray, form]);
-    localStorage.setItem("password", JSON.stringify([...passArray, form]));
-    console.log([...passArray, form]);
-  };
-
   useEffect(() => {
     let passwords = localStorage.getItem("password");
     if (passwords) {
       setpassArray(JSON.parse(passwords));
     }
-  }, [form]);
-
-  const handleChange = (e) => {
-    setform({ ...form, [e.target.name]: e.target.value });
-  };
+  }, []);
 
   const handleCopytext = (text) => {
-    toast('😀 Copy to clipboard!', {
+    toast("😀 Copy to clipboard!", {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -50,8 +33,49 @@ function Manager() {
       progress: undefined,
       theme: "light",
       // transition: Bounce,
-      });
+    });
     navigator.clipboard.writeText(text);
+  };
+
+  const handlePassword = () => {
+    setshowPassword((pass) => !pass);
+    const passwordInput = passwordRef.current;
+    if (passwordInput) {
+      passwordInput.type = showPassword ? "password" : "text";
+    }
+  };
+
+  const savePassword = () => {
+    setpassArray([...passArray, { ...form, id: uuidv4() }]);
+    localStorage.setItem(
+      "password",
+      JSON.stringify([...passArray, { ...form, id: uuidv4() }])
+    );
+    setform({ site: "", username: "", password: "" });
+    // console.log([...passArray, form]);
+  };
+
+  const deletePassword = (id) => {
+    console.log(" deleting id with password", id);
+    let conf = confirm("Are you sure you want to delete");
+    if (conf) {
+      setpassArray(passArray.filter((item) => item.id !== id));
+      localStorage.setItem(
+        "password",
+        JSON.stringify(passArray.filter((item) => item.id !== id))
+      );
+    }
+  };
+
+  const HandleEdit = (id) => {
+    setform(passArray.filter((item) => item.id === id)[0]);
+    setpassArray(passArray.filter((item) => item.id !== id));
+    console.log("editing id with password", passArray);
+    // localStorage.setItem("password", JSON.stringify(passArray.filter((item)=> item.id !== id)));
+  };
+
+  const handleChange = (e) => {
+    setform({ ...form, [e.target.name]: e.target.value });
   };
 
   return (
@@ -147,6 +171,7 @@ function Manager() {
                   <th className="py-1">website URL</th>
                   <th className="py-1">Username</th>
                   <th className="py-1">Password</th>
+                  <th className="py-1">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-green-100">
@@ -213,6 +238,36 @@ function Manager() {
                               alt="password"
                             />
                           </div>
+                        </div>
+                      </td>
+                      <td className="border border-white text-center py-2">
+                        <div className="flex justify-center items-center">
+                          <span onClick={() => HandleEdit(item.id)}>
+                            <img
+                              src="/edit.png"
+                              alt="edit"
+                              style={{
+                                height: "25px",
+                                width: "25px",
+                                paddingTop: "1px",
+                                cursor: "pointer",
+                                marginLeft: "4px",
+                              }}
+                            />
+                          </span>
+                          <span onClick={() => deletePassword(item.id)}>
+                            <img
+                              src="/delete.png"
+                              alt="delete"
+                              style={{
+                                height: "25px",
+                                width: "25px",
+                                paddingTop: "1px",
+                                cursor: "pointer",
+                                marginLeft: "4px",
+                              }}
+                            />
+                          </span>
                         </div>
                       </td>
                     </tr>
