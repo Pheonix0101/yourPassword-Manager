@@ -15,11 +15,16 @@ function Manager() {
   const passRef = useRef();
   const passwordRef = useRef();
 
+  const getPassword = async () => {
+    let req = await fetch("http://localhost:3000/");
+    let passwords = await req.json();
+
+    console.log(passwords);
+    setpassArray(passwords);
+  };
+
   useEffect(() => {
-    let passwords = localStorage.getItem("password");
-    if (passwords) {
-      setpassArray(JSON.parse(passwords));
-    }
+    getPassword();
   }, []);
 
   const handleCopytext = (text) => {
@@ -45,17 +50,31 @@ function Manager() {
     }
   };
 
-  const savePassword = () => {
+  const savePassword = async () => {
     if (
       form.site.length > 3 &&
       form.username.length > 3 &&
       form.password.length > 5
     ) {
       setpassArray([...passArray, { ...form, id: uuidv4() }]);
-      localStorage.setItem(
-        "password",
-        JSON.stringify([...passArray, { ...form, id: uuidv4() }])
-      );
+
+      // if such id exist in db then delete it before saving---- for edit mode.
+
+      await fetch("http://localhost:3000/delete", {
+        method: "DELETE",
+        headers: {
+          "content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: form.id }),
+      });
+
+      await fetch("http://localhost:3000/save", {
+        method: "POST",
+        headers: {
+          "content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...form, id: uuidv4() }),
+      });
       setform({ site: "", username: "", password: "" });
       toast("😀 Password saved!!!", {
         position: "top-right",
@@ -73,7 +92,7 @@ function Manager() {
     }
   };
 
-  const deletePassword = (id) => {
+  const deletePassword = async (id) => {
     toast("😀 Password deleted", {
       position: "top-right",
       autoClose: 3000,
@@ -89,15 +108,19 @@ function Manager() {
     let conf = confirm("Are you sure you want to delete");
     if (conf) {
       setpassArray(passArray.filter((item) => item.id !== id));
-      localStorage.setItem(
-        "password",
-        JSON.stringify(passArray.filter((item) => item.id !== id))
-      );
+
+      await fetch("http://localhost:3000/delete", {
+        method: "DELETE",
+        headers: {
+          "content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
     }
   };
 
   const HandleEdit = (id) => {
-    setform(passArray.filter((item) => item.id === id)[0]);
+    setform({...passArray.filter((item) => item.id === id)[0],id:id});
     setpassArray(passArray.filter((item) => item.id !== id));
     console.log("editing id with password", passArray);
     // localStorage.setItem("password", JSON.stringify(passArray.filter((item)=> item.id !== id)));
@@ -251,7 +274,7 @@ function Manager() {
                       </td>
                       <td className=" border border-white text-center py-2 ">
                         <div className="flex items-center justify-center">
-                          <span>{item.password}</span>
+                          <span>{"*".repeat((item.password).length)}</span>
                           <div
                             className="lordiconCopy cursor-pointer mx-1 size-7"
                             onClick={() => handleCopytext(item.password)}
